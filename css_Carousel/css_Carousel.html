@@ -1,0 +1,206 @@
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>My test page</title>
+	<style>
+		.all-c {
+			display: flex
+		}
+		.container {
+			border: 3px solid #ccc;
+			width: 317px;
+			height: 90px;
+			position: relative;
+			overflow: hidden;
+		}
+		.scroll-ul {
+			margin: 5px 0;
+			padding-left: 2px;
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 1800px;
+			transition: 1s all;
+		}
+		.item {
+			height: 100px;
+			width: 100px;
+			padding-right: 5px;
+			float: left;
+			list-style: none;
+		}
+		span {
+			display: inline-block;
+			height: 80px;
+			width: 103px;
+			background: #a66d59;
+			color: #fff;
+		}
+		
+	</style>
+  </head>
+  <body>
+    
+	<div id="" class="all-c">
+		<button class="arrow prev" >⇦</button>
+		<div class="container">
+			<ul class="scroll-ul" >
+				<li	class="item" style="padding-left: 0"><span>第1个</span></li>
+				<li	class="item" ><span>第2个</span></li>
+				<li	class="item" ><span>第3个</span></li>
+				<li	class="item" ><span>第4个</span></li>
+				<li	class="item" ><span>第5个</span></li>
+				<li	class="item" ><span>第6个</span></li>
+				<li	class="item" ><span>第7个</span></li>
+				<li	class="item" ><span>第8个</span></li>
+				<li	class="item" ><span>第9个</span></li>
+				<li	class="item" ><span>第10个</span></li>
+				<li	class="item" ><span>第11个</span></li>
+				<li	class="item" ><span>第12个</span></li>
+				<li	class="item" ><span>第13个</span></li>
+				<li	class="item" ><span>第14个</span></li>
+				<li	class="item" ><span>第15个</span></li>
+			</ul>
+		</div>
+		<button class="arrow next">⇨</button>
+	</div>
+
+	<!-- <script>
+		let len = document.getElementsByClassName("item").length
+		let ulDom = document.getElementsByClassName("scroll-ul")[0]
+		let step = 0, // 记录移动时走的步数
+			everyMoveCount = 4, // 每次移动几个元素
+			distance = document.getElementsByClassName("item")[0].getBoundingClientRect().width *  everyMoveCount,
+			currLeft = 0 // 记录每次移动后ul的left
+	
+		document.getElementsByClassName("prev")[0].onclick = function () {
+			autoPlay()  // 手动点击后去掉下一次自动轮播
+			prev('manual')
+		}
+		function prev(type) {
+			if (step < 1) return
+			--step
+			currLeft = currLeft + distance
+			setLeftPlay(type)
+		}
+	
+		document.getElementsByClassName("next")[0].onclick = function() {
+			autoPlay() // 手动点击后去掉下一次自动轮播
+			next('manual')
+		}
+		function next(type) {
+			if (step >= Math.ceil(len / everyMoveCount) - 1) return
+			currLeft = -(++step * distance)
+			setLeftPlay(type)
+		}
+	
+		function setLeftPlay(type) { // 设置ul的left，并继续下一次轮播
+			ulDom.style.left = currLeft
+			if (type === 'manual') autoPlay(true) // 手动点击后的下一次继续自动轮播
+		}
+		
+		// 自动轮播
+		let autoPlayInterval = 3000,
+			timer1 = null,
+			timer2 = null
+		function autoPlay(type) {
+			if (!type) {
+				clearTimeout(timer2)
+				return clearTimeout(timer1)
+			}
+			timer1 = setTimeout(() => {
+				next()
+				timer2 = setTimeout(() => {
+					autoPlay(true)
+				}, 6)
+			}, autoPlayInterval)
+		}
+		autoPlay(true)
+	</script> -->
+
+
+	<script>
+		class BannerScroll{
+			constructor({elem, childrenElem, everyMoveCount, autoPlay, autoPlayInterval = 3000}) {
+				this.elem = elem // 轮播的元素
+				this.childrenElem = childrenElem
+				this.everyMoveCount = everyMoveCount
+				this.stepTotal = Math.ceil(childrenElem.length / everyMoveCount) // 总共可以走几步
+				this.distance = childrenElem[0].getBoundingClientRect().width * everyMoveCount // 每次轮播需要移动的距离
+				this.step = 0 // 记录移动时走的步数
+				this.recordLeft = 0 // 记录每次移动后ul的left
+				this.autoPlay = autoPlay
+				this.autoPlayInterval = autoPlayInterval
+				this.timer1 = null
+				this.timer2 = null
+				this.initBanner()
+			}
+			prev = (e) => { // prev：是类字段，不是类方法
+				if (e) this.stopAutoPlay() // 手动点击后去掉下一次自动轮播
+				if (this.step < 1) return
+				--this.step
+				this.recordLeft = this.recordLeft + this.distance 
+				this.elem.style.left = this.recordLeft 
+				if (e) this.startAutoPlay() // 手动点击后的下一次继续自动轮播
+			}
+			next = (e) => {
+				if (e) this.stopAutoPlay() 
+				if (this.step >= this.stepTotal -1) return
+				++this.step
+				this.recordLeft = - (this.distance * this.step)
+				this.elem.style.left = this.recordLeft
+				if (e) this.startAutoPlay()
+			}
+			stopAutoPlay = () => {
+				clearTimeout(this.timer2)
+				clearTimeout(this.timer1)
+			}
+			startAutoPlay = () => {
+				this.timer1 = setTimeout(() => {
+					this.next()
+					this.timer2 = setTimeout(() => this.startAutoPlay(), 6)
+				}, this.autoPlayInterval)
+			}
+			splitDom = () => {
+				/**
+				let arr = new Array(this.everyMoveCount).fill(1)
+				let list = arr.map((item, index) => {
+					this.elem.appendChild(this.childrenElem[index])
+					return this.childrenElem[index]
+				})
+				console.log(this.everyMoveCount, list)
+				
+
+				点击下一步将
+
+
+
+
+				**/
+
+
+				
+			}
+			initBanner = () => {
+				if (this.autoPlay) {
+					this.startAutoPlay()
+				}
+			}
+		}
+	
+	
+		window.onload = function () {
+			let bannerScroll = new BannerScroll({
+				elem: document.getElementsByClassName("scroll-ul")[0],
+				childrenElem: document.getElementsByClassName("item"),
+				everyMoveCount: 2, // 每次移动几个元素
+				autoPlay: true
+			})
+			document.getElementsByClassName("next")[0].onclick = bannerScroll.next
+			document.getElementsByClassName("prev")[0].onclick = bannerScroll.prev
+		}
+	</script>
+
+  </body>
+</html>
